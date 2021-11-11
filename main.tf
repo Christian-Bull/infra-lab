@@ -12,6 +12,13 @@ terraform {
 provider "aws" {
   profile = "default"
   region  = var.default_region
+
+  default_tags {
+    tags = {
+      Name   = "slack-slash"
+      Author = "Terraform"
+    }
+  }
 }
 
 # networking
@@ -80,7 +87,7 @@ resource "aws_instance" "slack_slash_01" {
   key_name               = var.key_name
 
   tags = {
-    Name = "slack-slash"
+    Name = "slack-slash_01"
   }
 }
 
@@ -92,7 +99,7 @@ resource "aws_instance" "slack_slash_02" {
   key_name               = var.key_name
 
   tags = {
-    Name = "slack-slash"
+    Name = "slack-slash_02"
   }
 }
 
