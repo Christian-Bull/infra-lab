@@ -38,7 +38,7 @@ resource "aws_route_table" "slack_route_table" {
 }
 
 resource "aws_route_table_association" "slack_rta" {
-  subnet_id = aws_subnet.slack_subnet.id
+  subnet_id      = aws_subnet.slack_subnet.id
   route_table_id = aws_route_table.slack_route_table.id
 }
 
@@ -77,7 +77,7 @@ resource "aws_instance" "slack_slash_01" {
   instance_type          = var.ec2_instance_type
   vpc_security_group_ids = [aws_security_group.slack_group.id]
   subnet_id              = aws_subnet.slack_subnet.id
-  key_name = var.key_name
+  key_name               = var.key_name
 
   tags = {
     Name = "slack-slash"
@@ -89,7 +89,7 @@ resource "aws_instance" "slack_slash_02" {
   instance_type          = var.ec2_instance_type
   vpc_security_group_ids = [aws_security_group.slack_group.id]
   subnet_id              = aws_subnet.slack_subnet.id
-  key_name = var.key_name
+  key_name               = var.key_name
 
   tags = {
     Name = "slack-slash"
@@ -97,8 +97,8 @@ resource "aws_instance" "slack_slash_02" {
 }
 
 resource "aws_elb" "slack_twitch" {
-  name = "slack-slash-elb"
-  subnets = [aws_subnet.slack_subnet]
+  name    = "slack-slash-elb"
+  subnets = [aws_subnet.slack_subnet.id]
 
   listener {
     instance_port     = 8000
@@ -114,9 +114,9 @@ resource "aws_elb" "slack_twitch" {
     target              = "HTTP:8000/"
     interval            = 30
   }
-  
-  instances                   = [aws_instance.slack_slash_01, aws_instance.slack_slash_02]
-  idle_timeout                = 400
+
+  instances    = [aws_instance.slack_slash_01.id, aws_instance.slack_slash_02.id]
+  idle_timeout = 400
 
 }
 
