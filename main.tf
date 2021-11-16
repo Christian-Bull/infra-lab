@@ -29,6 +29,7 @@ resource "aws_vpc" "slack_vpc" {
 resource "aws_subnet" "slack_subnet" {
   vpc_id     = aws_vpc.slack_vpc.id
   cidr_block = var.vpc_subnet
+  map_public_ip_on_launch = true
 }
 
 resource "aws_internet_gateway" "slack_vpc" {
@@ -108,7 +109,7 @@ resource "aws_elb" "slack_twitch" {
   subnets = [aws_subnet.slack_subnet.id]
 
   listener {
-    instance_port     = 8000
+    instance_port     = 80
     instance_protocol = "http"
     lb_port           = 80
     lb_protocol       = "http"
@@ -118,7 +119,7 @@ resource "aws_elb" "slack_twitch" {
     healthy_threshold   = 2
     unhealthy_threshold = 2
     timeout             = 3
-    target              = "HTTP:8000/"
+    target              = "HTTP:80/"
     interval            = 30
   }
 
