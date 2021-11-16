@@ -69,6 +69,13 @@ resource "aws_security_group" "slack_group" {
     cidr_blocks = ["0.0.0.0/0"]
   }
 
+  ingress {
+    from_port = 22
+    to_port = 22
+    protocol = "TCP"
+    cidr_blocks = [var.whitelist_ip]
+  }
+
   # Allow all outbound traffic
   egress {
     from_port   = 0
@@ -87,45 +94,14 @@ resource "aws_instance" "slack_slash_01" {
   subnet_id              = aws_subnet.slack_subnet.id
   key_name               = var.key_name
 
+  provisioner "file" {
+    source      = "ec2_bootstrap.sh"
+    destination = "util/ec2_bootstrap.sh"
+  }
+
   tags = {
     Name = "slack-slash_01"
   }
-}
-
-resource "aws_instance" "slack_slash_02" {
-  ami                    = var.ec2_ami
-  instance_type          = var.ec2_instance_type
-  vpc_security_group_ids = [aws_security_group.slack_group.id]
-  subnet_id              = aws_subnet.slack_subnet.id
-  key_name               = var.key_name
-
-  tags = {
-    Name = "slack-slash_02"
-  }
-}
-
-resource "aws_elb" "slack_twitch" {
-  name    = "slack-slash-elb"
-  subnets = [aws_subnet.slack_subnet.id]
-
-  listener {
-    instance_port     = 80
-    instance_protocol = "http"
-    lb_port           = 80
-    lb_protocol       = "http"
-  }
-
-  health_check {
-    healthy_threshold   = 2
-    unhealthy_threshold = 2
-    timeout             = 3
-    target              = "HTTP:80/"
-    interval            = 30
-  }
-
-  instances    = [aws_instance.slack_slash_01.id, aws_instance.slack_slash_02.id]
-  idle_timeout = 400
-
 }
 
 resource "aws_key_pair" "default_key" {
