@@ -27,8 +27,8 @@ resource "aws_vpc" "slack_vpc" {
 }
 
 resource "aws_subnet" "slack_subnet" {
-  vpc_id     = aws_vpc.slack_vpc.id
-  cidr_block = var.vpc_subnet
+  vpc_id                  = aws_vpc.slack_vpc.id
+  cidr_block              = var.vpc_subnet
   map_public_ip_on_launch = true
 }
 
@@ -70,9 +70,9 @@ resource "aws_security_group" "slack_group" {
   }
 
   ingress {
-    from_port = 22
-    to_port = 22
-    protocol = "TCP"
+    from_port   = 22
+    to_port     = 22
+    protocol    = "TCP"
     cidr_blocks = [var.whitelist_ip]
   }
 
@@ -94,10 +94,29 @@ resource "aws_instance" "slack_slash_01" {
   subnet_id              = aws_subnet.slack_subnet.id
   key_name               = var.key_name
 
-  provisioner "file" {
-    source      = "ec2_bootstrap.sh"
-    destination = "util/ec2_bootstrap.sh"
-  }
+  user_data = <<-EOL
+  #!/bin/bash -xe
+
+  sudo apt update
+
+  sudo apt-get -y install \
+    ca-certificates \
+    curl \
+    gnupg \
+    lsb-release
+
+  curl -fsSL https://download.docker.com/linux/ubuntu/gpg | sudo gpg --dearmor -o /usr/share/keyrings/docker-archive-keyring.gpg
+
+  echo \
+    "deb [arch=$(dpkg --print-architecture) signed-by=/usr/share/keyrings/docker-archive-keyring.gpg] https://download.docker.com/linux/ubuntu \
+    $(lsb_release -cs) stable" | sudo tee /etc/apt/sources.list.d/docker.list > /dev/null
+
+  sudo apt-get update
+  sudo apt-get -y install docker-ce docker-ce-cli containerd.io
+
+  sudo gpasswd -a $USER docker
+
+  EOL
 
   tags = {
     Name = "slack-slash_01"

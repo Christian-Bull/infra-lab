@@ -34,6 +34,6 @@ variable "pub_key" {
 }
 
 variable "whitelist_ip" {
-  type = string
+  type    = string
   default = null
 }
