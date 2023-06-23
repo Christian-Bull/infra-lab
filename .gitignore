@@ -1,4 +1,5 @@
-terraform.tfvars
+terraform.tfvars*
 .terraform*
 *.tfstate*
 creds
+terraform.tvars.example

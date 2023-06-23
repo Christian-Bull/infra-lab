@@ -1,3 +1,0 @@
-pub_key           = "ssh pub key here"
-ec2_ami           = "ami-0279c3b3186e54acd"
-ec2_instance_type = "t2.micro"

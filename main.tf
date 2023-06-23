@@ -15,7 +15,7 @@ provider "aws" {
 
   default_tags {
     tags = {
-      Name   = "slack-slash"
+      Name   = "app-host"
       Author = "Terraform"
     }
   }
@@ -94,36 +94,16 @@ resource "aws_instance" "slack_slash_01" {
   subnet_id              = aws_subnet.slack_subnet.id
   key_name               = var.key_name
 
-  user_data = <<-EOL
-  #!/bin/bash -xe
-
-  sudo apt update
-
-  sudo apt-get -y install \
-    ca-certificates \
-    curl \
-    gnupg \
-    lsb-release
-
-  curl -fsSL https://download.docker.com/linux/ubuntu/gpg | sudo gpg --dearmor -o /usr/share/keyrings/docker-archive-keyring.gpg
-
-  echo \
-    "deb [arch=$(dpkg --print-architecture) signed-by=/usr/share/keyrings/docker-archive-keyring.gpg] https://download.docker.com/linux/ubuntu \
-    $(lsb_release -cs) stable" | sudo tee /etc/apt/sources.list.d/docker.list > /dev/null
-
-  sudo apt-get update
-  sudo apt-get -y install docker-ce docker-ce-cli containerd.io
-
-  sudo gpasswd -a $USER docker
-
-  EOL
-
   tags = {
-    Name = "slack-slash_01"
+    Name = "app-host-1"
   }
 }
 
 resource "aws_key_pair" "default_key" {
   key_name   = var.key_name
   public_key = var.pub_key
+}
+
+resource "aws_eip" "lb" {
+  instance = aws_instance.slack_slash_01.id
 }
